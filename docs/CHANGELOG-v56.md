@@ -10,8 +10,6 @@
 - D3108 状态刷新为“已开售 · 待购买”。
 - package version 更新为 0.56.0。
 
-下一批重点：低清 P1 素材、真实手机截图巡检、英语现场词条减法、票夹真实流程回归。
-
 
 ## 第二批：场景英语与交通语义
 
@@ -21,3 +19,13 @@
 - T1 移除误导性的旧 Changi/Jewel 大图，改为 Changi Airport / Terminal 1 / TR128 功能摘要。
 - D3108 从内部 `flight` 类型修正为 `train`，详情页显示潮汕 → 上海南及厦门北中间站，不再出现飞机语义。
 - 现场回归：主页滑动、离线英语播放、鱼尾狮/NTU/USS/T1/揭阳场景页、v54 票夹均通过浏览器 smoke。
+
+
+## 第三批：发布前技术冻结
+
+- Web 壳、Service Worker、Android versionCode/versionName、iOS MARKETING_VERSION、数据版本与图片注册表全部统一到 v56。
+- Android/iOS/普通 CI 均改为使用 `package-lock.json` + `npm ci`，避免依赖漂移。
+- `@capacitor/cli` 从 7.4.3 更新到 7.6.9（Capacitor 7 同 major 安全补丁）。
+- GitHub runner 重新生成并提交 lock；锁定后的依赖审计结果为 0 info / 0 low / 0 moderate / 0 high / 0 critical。
+- 新增 Dependency Audit workflow，后续 package / lock 变化会自动复核。
+- 当前状态：**v56 功能冻结候选版**。后续不再增加主功能，只允许真机兼容修复、真实订单状态更新和独立图片高清替换。
