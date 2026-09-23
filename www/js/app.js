@@ -67,7 +67,8 @@ function momentMarkup(key,module){
  const im=momentFor(key,module);if(!im)return'';
  return `<figure class="moment-card"><img src="${esc(imageURL(im))}" alt="${esc(im.title||'旅行瞬间')}" loading="lazy" decoding="async" style="object-position:${esc(im.focal||'50% 50%')}"><figcaption>${esc(im.title||'旅行瞬间')}</figcaption></figure>`;
 }
-const HOME_IMAGE_ID_OVERRIDE={arrival:'companion-arrival-01'};\nconst HOME_NO_IMAGE=new Set(['t1']);
+const HOME_IMAGE_ID_OVERRIDE={arrival:'companion-arrival-01'};
+const HOME_NO_IMAGE=new Set(['t1']);
 const HOME_MOMENT_OVERRIDE={
  hgh:'execution',
  sleep:'rest',
