@@ -13,11 +13,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install
+      - run: npm ci
       - run: npm run check:source
       - run: npm audit --audit-level=high
-      - uses: actions/upload-artifact@v4
-        with:
-          name: package-lock-v56
-          path: package-lock.json
-          if-no-files-found: error
