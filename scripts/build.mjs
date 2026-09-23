@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+process.chdir(root);
+await build({entryPoints:['src/native-bridge.js'],outfile:'www/js/native-bridge.js',bundle:true,format:'iife',target:['es2020'],minify:true,legalComments:'linked'});
+for(const required of ['www/index.html','www/js/trip-data.js','www/js/image-registry.js','www/js/audio-data.js','www/js/app.js'])if(!fs.existsSync(required))throw new Error('Missing '+required);
+console.log('Tuhu v55: native bridge bundled.');
+await import('./worker.mjs');

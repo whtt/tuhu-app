@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const file=path.join(root,'www/assets/image-registry.json');
+const args=Object.fromEntries(process.argv.slice(2).map(x=>{const i=x.indexOf('=');return i<0?[x.replace(/^--/,''),true]:[x.slice(2,i),x.slice(i+1)]}));
+for(const k of ['scene','id','src'])if(!args[k])throw new Error(`Missing --${k}=...`);
+const data=JSON.parse(fs.readFileSync(file,'utf8'));
+if(data.entries.some(x=>x.id===args.id))throw new Error('Duplicate id '+args.id);
+const role=args.role||'hero';
+const targets=(args.targets||'deck,timeline,modal,photo,lightbox').split(',').map(x=>x.trim()).filter(Boolean);
+data.entries.push({id:args.id,scene_id:args.scene,role,card_targets:targets,src:args.src,thumb:args.thumb||args.src,title:args.title||args.scene,query:args.query||'',blur_ok:args.blur!=='false',focal:args.focal||'50% 50%',priority:Number(args.priority||1),source:args.source||'generated'});
+fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');
+console.log(`Registered ${args.id} -> ${args.scene} [${targets.join(', ')}]`);
