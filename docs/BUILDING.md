@@ -9,7 +9,7 @@
 ## Android
 
 ```bash
-npm install
+npm ci
 npm run android:prepare
 cd android
 ./gradlew assembleDebug
@@ -20,7 +20,7 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 ## iOS simulator
 
 ```bash
-npm install
+npm ci
 npm run ios:prepare
 xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
