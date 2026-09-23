@@ -1,0 +1,17 @@
+node_modules/
+android/
+ios/
+dist/
+.tmp/
+.DS_Store
+*.log
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+.env
+.env.*
+# Personal travel credentials are local-only and must never be committed.
+www/user-data/
+www/uploads/
+www/credentials/

@@ -1,0 +1,20 @@
+{
+  "appId": "com.fieldnotes.singaporejieyang",
+  "appName": "兔狐",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true
+    }
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

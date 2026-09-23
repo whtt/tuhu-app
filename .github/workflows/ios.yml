@@ -1,0 +1,151 @@
+name: TUHU iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Build target
+        required: true
+        default: simulator
+        type: choice
+        options:
+          - simulator
+          - testflight
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    env:
+      BUNDLE_ID: com.fieldnotes.singaporejieyang
+      SCHEME: App
+      APP_VERSION: 55.0.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install JS dependencies
+        run: npm install
+      - name: Verify source structure
+        run: npm run check:source
+      - name: Require runtime media bundle
+        run: |
+          test -d www/assets/audio
+          test -d www/assets/photos
+          test -d www/assets/generated
+          npm run check:full
+      - name: Prepare Capacitor iOS project
+        run: npm run ios:prepare
+      - name: Show Xcode / CocoaPods versions
+        run: |
+          xcodebuild -version
+          pod --version || true
+      - name: Build iOS Simulator smoke test
+        if: ${{ inputs.target == 'simulator' }}
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" \
+            MARKETING_VERSION="$APP_VERSION" \
+            build
+          APP_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*/Build/Products/Debug-iphonesimulator/App.app' -print -quit)
+          test -n "$APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" TUHU-v55-iOS-Simulator.zip
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.target == 'simulator' }}
+        with:
+          name: TUHU-v55-iOS-Simulator
+          path: TUHU-v55-iOS-Simulator.zip
+          if-no-files-found: error
+
+      - name: Import Apple distribution certificate
+        if: ${{ inputs.target == 'testflight' }}
+        uses: Apple-Actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+      - name: Download App Store provisioning profile
+        if: ${{ inputs.target == 'testflight' }}
+        id: provisioning
+        uses: Apple-Actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.BUNDLE_ID }}
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Resolve profile and export options
+        if: ${{ inputs.target == 'testflight' }}
+        env:
+          PROFILES_JSON: ${{ steps.provisioning.outputs.profiles }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$APPLE_TEAM_ID"
+          printf '%s' "$PROFILES_JSON" > /tmp/profiles.json
+          PROFILE_NAME=$(python3 - <<'PY'
+          import json
+          p=json.load(open('/tmp/profiles.json'))
+          if not p: raise SystemExit('No provisioning profile returned')
+          print(p[0].get('name') or p[0].get('attributes',{}).get('name') or '')
+          PY
+          )
+          test -n "$PROFILE_NAME"
+          echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          cp ci/ExportOptions.plist /tmp/ExportOptions.plist
+          sed -i '' "s/__APPLE_TEAM_ID__/$APPLE_TEAM_ID/g; s/__PROFILE_NAME__/$PROFILE_NAME/g" /tmp/ExportOptions.plist
+      - name: Archive and export signed IPA
+        if: ${{ inputs.target == 'testflight' }}
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          rm -rf build/TUHU.xcarchive build/export
+          mkdir -p build/export
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/TUHU.xcarchive \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY='Apple Distribution' \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" \
+            MARKETING_VERSION="$APP_VERSION" \
+            archive
+          xcodebuild -exportArchive \
+            -archivePath build/TUHU.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist /tmp/ExportOptions.plist
+          IPA=$(find build/export -name '*.ipa' -print -quit)
+          test -n "$IPA"
+          echo "IPA=$IPA" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.target == 'testflight' }}
+        with:
+          name: TUHU-v55-iOS-IPA
+          path: ${{ env.IPA }}
+          if-no-files-found: error
+      - name: Upload to TestFlight
+        if: ${{ inputs.target == 'testflight' }}
+        uses: Apple-Actions/upload-testflight-build@v4
+        with:
+          app-path: ${{ env.IPA }}
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          uses-non-exempt-encryption: 'false'
+          wait-for-processing: 'true'
+          backend: AppStoreAPI

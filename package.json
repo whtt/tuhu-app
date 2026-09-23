@@ -1,0 +1,37 @@
+{
+  "name": "tuhu-mobile",
+  "version": "0.55.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "npm run check:source",
+    "preview": "node scripts/serve.mjs",
+    "android:prepare": "node scripts/prepare-android.mjs",
+    "android:open": "cap open android",
+    "android": "npm run android:prepare && npm run android:open",
+    "sync": "npm run android:prepare",
+    "preview:export": "node scripts/export-preview.mjs",
+    "images:build": "node scripts/build-image-registry.mjs",
+    "images:register": "node scripts/register-image.mjs",
+    "ios:prepare": "node scripts/prepare-ios.mjs",
+    "ios:open": "cap open ios",
+    "ios": "npm run ios:prepare && npm run ios:open",
+    "check:source": "node scripts/check-source.mjs",
+    "check:full": "node scripts/check-full.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "7.4.3",
+    "@capacitor/android": "7.4.3",
+    "@capacitor/app": "7.1.0",
+    "@capacitor-community/text-to-speech": "6.1.0",
+    "@capacitor/ios": "7.4.3",
+    "@capacitor/browser": "7.0.5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.4.3",
+    "esbuild": "0.25.5"
+  }
+}

@@ -1,0 +1,20 @@
+name: Release metadata
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag (for example v55)
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "TUHU $TAG" --generate-notes
