@@ -67,37 +67,32 @@ function momentMarkup(key,module){
  const im=momentFor(key,module);if(!im)return'';
  return `<figure class="moment-card"><img src="${esc(imageURL(im))}" alt="${esc(im.title||'旅行瞬间')}" loading="lazy" decoding="async" style="object-position:${esc(im.focal||'50% 50%')}"><figcaption>${esc(im.title||'旅行瞬间')}</figcaption></figure>`;
 }
-const HOME_HOTEL_CHECKIN=new Set(['capsule','faberBag','jieyangHotel']);
-const HOME_HOTEL_REST=new Set(['sleep','sthotel','faberReturn','faberHotel','ussReturn','jyBag']);
-const HOME_FOOD_FIRST=new Set(['foodLunch','foodDinner','ntuFood','ussLunch','ussDinner','jieyangDinner','jyBreakfast']);
-// Reuse the existing asset pool more deliberately so consecutive field cards do not
-// collapse into the same generic picture. No new artwork is generated in v55.
+const HOME_IMAGE_ID_OVERRIDE={arrival:'companion-arrival-01'};
 const HOME_MOMENT_OVERRIDE={
- hgh:'execution',zh9884:'wallet',szx:'map',szx2:'execution',zh227:'wallet',
- capsule:'map',faberReturn:'map',ussReturn:'map',tr128:'wallet',toChaoshan:'map',d3108:'wallet'
+ hgh:'execution',
+ sleep:'rest',
+ ussAm:'zone',
+ ussPm1:'zone',
+ ussRest:'rest',
+ jieyangHotel:'hotel'
 };
+function preferredHeroFor(key,target='timeline'){
+ const list=imagesFor(key,target).filter(x=>x.role==='hero');
+ if(!list.length)return null;
+ const forced=HOME_IMAGE_ID_OVERRIDE[key]&&list.find(x=>x.id===HOME_IMAGE_ID_OVERRIDE[key]);
+ if(forced)return forced;
+ const high=list.filter(x=>Math.max(Number(x.width)||0,Number(x.height)||0)>=1000);
+ if(high.length)return high[0];
+ return list.slice().sort((a,b)=>{
+  const aa=(Number(a.width)||0)*(Number(a.height)||0),bb=(Number(b.width)||0)*(Number(b.height)||0);
+  return bb-aa+(Number(a.priority||99)-Number(b.priority||99))/100;
+ })[0]||null;
+}
 function homeImageFor(key,target='timeline'){
- const c=rowFor(key),kind=c?.s?.kind||'';
- const hero=imageFor(key,target,'hero');
- const pick=(...mods)=>{for(const m of mods){const x=momentFor(key,m);if(x)return x}return null};
- // Exact scene art wins. Then apply small, explicit reuse choices from the existing
- // moment library before falling back to kind-level generic imagery.
+ const hero=preferredHeroFor(key,target);
  if(hero)return hero;
- if(HOME_MOMENT_OVERRIDE[key])return pick(HOME_MOMENT_OVERRIDE[key]);
- if(HOME_FOOD_FIRST.has(key)||kind==='food')return pick('food','rest');
- if(HOME_HOTEL_CHECKIN.has(key))return pick('hotel','rest');
- if(HOME_HOTEL_REST.has(key)||kind==='hotel')return pick('rest','hotel','food');
- if(kind==='airport'||kind==='flight')return pick('execution','map');
- if(kind==='route')return pick('map','hotel','rest');
- if(kind==='themepark')return pick('zone','food','rest');
- if(kind==='rest')return pick('rest','zone');
- if(kind==='checklist'){
-  if(key==='ussPrep')return pick('food','zone');
-  if(key==='pack')return pick('rest','hotel','execution');
-  return pick('execution','map');
- }
- if(kind==='walk'||kind==='attraction'||kind==='campus')return pick('execution','map');
- return pick('map','execution','rest','food','hotel','zone');
+ const module=HOME_MOMENT_OVERRIDE[key];
+ return module?momentFor(key,module):null;
 }
 function imageURL(x,thumb=false){return x?(thumb?(x.thumb||x.src):x.src):''}
 function imageTitle(x){return x?.title||'拍照参考'}
@@ -116,9 +111,28 @@ const tileTheme={assistant:['#eef0ff','#6d6bd1'],execution:['#fff1e6','#e79550']
 function tile(type,key=null,day=state.day,label=typeLabel[type]){const th=tileTheme[type]||['#eaf5f5','#49858c'];return btn(`<span class="tile-icon" style="--tile-bg:${th[0]};--tile-ink:${th[1]}">${icon(typeIcon[type]||'more')}</span><span>${esc(label)}</span>`,'feature',{type,key,day},'product-tile')}
 const HOTEL_KEYS=new Set(['capsule','sleep','sthotel','faberBag','faberHotel','ussReturn','jieyangHotel','jyBreakfast']);
 function available(c){let t=['execution'];if(c.s.map?.length)t.push('map');if(imagesFor(c.key,'photo').length)t.push('photo');if(englishCategories({key:c.key,day:c.day}).length)t.push('english');t.push('notes','wallet');if(D.VLOG_SCENE[c.key])t.push('capture');if(c.s.guide?.length||D.PLACE_DETAIL[c.key]?.length||D.SPECIAL_SCENE[c.key])t.push('guide');if(D.USS_SCENE_ZONE[c.key])t.push('zone');if(c.s.kind==='food'||['holland','kampong','merlion','ntu'].includes(c.key))t.push('food');if(c.s.kind==='hotel'||HOTEL_KEYS.has(c.key))t.push('hotel');t.push('assistant');return [...new Set(t)]}
+function orderedActions(c){
+ const actions=available(c),kind=c?.s?.kind||'';
+ const prefs={
+  airport:['execution','english','map','notes','wallet','assistant','photo'],
+  flight:['execution','english','notes','wallet','map','assistant','photo'],
+  route:['map','execution','english','notes','hotel','wallet','assistant','photo'],
+  hotel:['hotel','execution','english','notes','wallet','map','assistant','photo'],
+  attraction:['photo','capture','map','guide','execution','english','food','notes','wallet','assistant'],
+  walk:['photo','capture','map','guide','food','english','execution','notes','wallet','assistant'],
+  campus:['photo','capture','map','guide','food','execution','english','notes','wallet','assistant'],
+  themepark:['zone','execution','map','english','photo','capture','food','notes','wallet','assistant'],
+  food:['food','map','english','notes','photo','execution','wallet','assistant'],
+  checklist:['execution','notes','english','wallet','map','assistant','photo'],
+  rest:['notes','english','assistant','execution','map','photo','wallet']
+ }[kind]||['execution','map','photo','english','notes','wallet','assistant'];
+ const out=[];for(const x of prefs)if(actions.includes(x)&&!out.includes(x))out.push(x);
+ for(const x of actions)if(!out.includes(x))out.push(x);
+ return out;
+}
 function getSelectedKey(){return D.DAYS[state.day].timeline[state.index]?.[4]}
 function homeCardMarkup(r,i){const im=homeImageFor(r[4],'deck');return `<li class="fn-card" data-index="${i}"><button type="button" class="fn-select" data-home-index="${i}" aria-label="打开 ${esc(r[0]+' '+r[1])}">${im?`<img class="fn-art" src="${esc(imageURL(im,true))}" alt="" draggable="false" style="object-position:${esc(im.focal||'50% 50%')}">`:''}<span class="fn-active-text"><time class="fn-time">${esc(r[0])}</time><strong class="fn-title">${esc(r[1])}</strong><span class="fn-sub">${esc(r[2]||r[3])}</span></span><span class="fn-compact-text"><time>${esc(r[0].split(/[–—-]/)[0])}</time><b>${esc(r[1])}</b></span></button></li>`}
-function journeyMarkup(r,i){const im=homeImageFor(r[4],'timeline');const media=im?`<img class="journey-bg" src="${esc(imageURL(im,true))}" alt="" draggable="false" style="object-position:${esc(im.focal||'50% 50%')}"><span class="journey-shade" aria-hidden="true"></span>`:'';return `<li class="journey-row${i===state.index?' selected':''}" data-index="${i}"><span class="journey-node" aria-hidden="true"></span><button type="button" class="journey-card${im?' has-image':''}" data-journey-index="${i}" aria-label="打开 ${esc(r[0]+' '+r[1])}">${media}<span class="journey-copy"><span class="journey-kicker"><time>${esc(r[0])}</time>${i===state.index?'<em>当前</em>':''}</span><strong>${esc(r[1])}</strong><small>${esc(r[2]||r[3]||'')}</small></span></button></li>`}
+function journeyMarkup(r,i){const im=homeImageFor(r[4],'timeline');const media=im?`<img class="journey-bg" src="${esc(imageURL(im,true))}" alt="" draggable="false" style="object-position:${esc(im.focal||'50% 50%')}"><span class="journey-shade" aria-hidden="true"></span>`:'';return `<li class="journey-row${i===state.index?' selected':''}" data-index="${i}"><span class="journey-node" aria-hidden="true"></span><button type="button" class="journey-card${im?' has-image':''}" data-journey-index="${i}" aria-label="打开 ${esc(r[0]+' '+r[1])}">${media}<span class="journey-copy"><span class="journey-kicker"><time>${esc(r[0])}</time>${i===state.index?'<em>当前</em>':''}</span><strong>${esc(r[1])}</strong></span></button></li>`}
 function syncHomeSelection(i=state.index){
  state.index=clamp(i,0,D.DAYS[state.day].timeline.length-1);
  $('#positionText').textContent=`${state.index+1} / ${D.DAYS[state.day].timeline.length}`;
@@ -237,7 +251,7 @@ async function renderView(){
  try{
   switch(v.type){
    case'scene':html=sceneView(v);break;
-   case'scene-more':html='<div class="product-grid scene-more-grid">'+available(ctx(v)).slice(4).map(t=>tile(t,v.key,viewDay(v))).join('')+'</div>';break;
+   case'scene-more':html='<div class="product-grid scene-more-grid">'+orderedActions(ctx(v)).slice(4).map(t=>tile(t,v.key,viewDay(v))).join('')+'</div>';break;
    case'execution':html=executionView(v);break;
    case'field':html=fieldView(v);break;
    case'map':html=mapView(v);break;
@@ -286,7 +300,7 @@ async function renderView(){
 }
 function sceneView(v){
  const c=ctx(v);if(!c)return'<div class="empty">该行程不存在。</div>';
- const im=imageFor(c.key,'modal'),actions=available(c);let hero='';
+ const im=preferredHeroFor(c.key,'modal'),actions=orderedActions(c);let hero='';
  if(im)hero=`<button class="hero" data-a="feature" data-type="photo" data-key="${esc(c.key)}" data-day="${c.day}"><img src="${esc(imageURL(im))}" alt="${esc(imageTitle(im))}" decoding="async" style="object-position:${esc(im.focal||'50% 50%')}"><span class="hero-caption"><span>${esc(c.row[3])}</span><span>${icon('camera')}</span></span></button>`;
  else if(c.s.kind==='flight'){
   const names=c.row[2].split('→');
