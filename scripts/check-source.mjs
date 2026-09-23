@@ -12,5 +12,5 @@ for(const f of ['www/js/app.js','www/js/motion.js','www/js/assistant.js','www/js
 const cap=JSON.parse(fs.readFileSync('capacitor.config.json','utf8'));
 if(cap.appId!=='com.fieldnotes.singaporejieyang') throw new Error('Unexpected appId');
 const app=fs.readFileSync('www/js/app.js','utf8');
-for(const marker of ['walletNowCard','booking_id:id','scene-product-grid']) if(!app.includes(marker)) throw new Error(`Missing v55 marker: ${marker}`);
-console.log('PASS: TUHU source structure and v55 markers are intact.');
+for(const marker of ['walletNowCard','booking_id:id','scene-product-grid']) if(!app.includes(marker)) throw new Error(`Missing v56 marker: ${marker}`);
+console.log('PASS: TUHU source structure and v56 markers are intact.');
