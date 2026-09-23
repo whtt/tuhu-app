@@ -17,7 +17,7 @@ if(fs.existsSync(iconSrc)){fs.rmSync(iconDst,{recursive:true,force:true});fs.cpS
 // Keep the iOS build metadata stable while CI supplies a unique build number.
 const pbx='ios/App/App.xcodeproj/project.pbxproj';
 let x=fs.readFileSync(pbx,'utf8');
-x=x.replace(/MARKETING_VERSION = [^;]+;/g,'MARKETING_VERSION = 55.0.0;');
+x=x.replace(/MARKETING_VERSION = [^;]+;/g,'MARKETING_VERSION = 56.0.0;');
 x=x.replace(/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/g,'PRODUCT_BUNDLE_IDENTIFIER = com.fieldnotes.singaporejieyang;');
 fs.writeFileSync(pbx,x);
-console.log('\nTuhu v55 iOS prepared. Core travel functions are iOS-ready; Android-only GGUF model support falls back to the built-in travel knowledge base.');
+console.log('\nTuhu v56 iOS prepared. Core travel functions are iOS-ready; Android-only GGUF model support falls back to the built-in travel knowledge base.');
