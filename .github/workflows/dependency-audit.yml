@@ -1,0 +1,50 @@
+name: Dependency Audit
+
+on:
+  push:
+    paths:
+      - package.json
+      - package-lock.json
+      - .github/workflows/dependency-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lock-and-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+        continue-on-error: true
+      - name: Generate deterministic lock
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Audit dependencies
+        id: audit
+        shell: bash
+        run: |
+          npm audit --json > npm-audit.json || true
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('npm-audit.json','utf8'));
+          const v=a.metadata?.vulnerabilities||{};
+          const total=Object.values(v).reduce((n,x)=>n+(Number(x)||0),0);
+          console.log('npm audit:', v);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            '# Dependency audit\n\n'+
+            '| severity | count |\n|---|---:|\n'+
+            ['info','low','moderate','high','critical'].map(k=>`| ${k} | ${v[k]||0} |`).join('\n')+
+            `\n\nTotal: **${total}**\n`);
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit
+          path: |
+            package-lock.json
+            npm-audit.json
+          retention-days: 7
