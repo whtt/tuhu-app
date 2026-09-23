@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const web=path.join(root,'www');
-const out=path.resolve(root,process.argv[2]||'dist/tuhu_v55_preview.html');
+const out=path.resolve(root,process.argv[2]||'dist/tuhu_v56_preview.html');
 const mime={'.png':'image/png','.webp':'image/webp','.mp3':'audio/mpeg'};
 const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
 const assets=walk(path.join(web,'assets')).filter(p=>mime[path.extname(p)]);
