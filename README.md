@@ -22,7 +22,7 @@ v56 延续 v55 / v54 的中心叠层时间轴、现场票夹、全屏凭证、�
 ## 构建
 
 ```bash
-npm install
+npm ci
 npm run check:source
 npm run android:prepare   # 生成 android/
 npm run ios:prepare       # macOS / GitHub Actions 生成 ios/
