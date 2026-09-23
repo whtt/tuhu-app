@@ -108,3 +108,13 @@
 .english-toolbar{position:sticky;top:-17px;z-index:4;background:linear-gradient(#fff 78%,#ffffff00);padding:10px 0 8px;margin-top:-10px}
 .phrase{margin-bottom:9px}.phrase-main{padding-top:10px;padding-bottom:9px}.phrase-actions{min-height:40px}
 @media(max-height:720px){.hero img{height:178px}.scene-product-grid .product-tile{min-height:58px}.dialog-body{padding-top:13px}.scene-actionline{margin-bottom:9px}}
+
+/* v56 text-only journey cards: visual balance without fake/reused photos. */
+.fn-empty-art{position:absolute;right:7%;top:50%;width:86px;height:86px;transform:translateY(-50%) rotate(-5deg);display:grid;place-items:center;color:#7fb5ba;opacity:calc(var(--fn-expanded)*.16);pointer-events:none;z-index:0}
+.fn-empty-art svg{width:64px;height:64px;stroke-width:1.25}
+.fn-select.no-image:after{background:radial-gradient(circle at 82% 50%,rgba(156,214,215,.16),transparent 34%),linear-gradient(120deg,#ffffff25,#dff3f22d)}
+.fn-select.no-image .fn-active-text{padding-right:30%}
+.journey-empty-art{position:absolute;right:17px;top:50%;width:44px;height:44px;transform:translateY(-50%);display:grid;place-items:center;color:#82b5ba;opacity:.08;pointer-events:none}
+.journey-empty-art svg{width:34px;height:34px;stroke-width:1.3}
+.journey-row.selected .journey-empty-art{opacity:.16;transform:translateY(-50%) scale(1.08)}
+.journey-card.no-image .journey-copy{padding-right:48px}
