@@ -2,8 +2,8 @@ import fs from 'node:fs';import path from 'node:path';import {fileURLToPath}from
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../www');
 const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
 const assets=['./','./index.html','./manifest.webmanifest','./css/app.css',...['js','assets'].flatMap(d=>walk(path.join(root,d)).map(p=>'./'+path.relative(root,p).split(path.sep).join('/')))];
-const worker=`/* Tuhu v55. Cache bundled app resources only; never user receipts or third-party map tiles. */
-const CACHE='tuhu-v55-shell-1';
+const worker=`/* Tuhu v56. Cache bundled app resources only; never user receipts or third-party map tiles. */
+const CACHE='tuhu-v56-shell-1';
 const ASSETS=${JSON.stringify(assets)};
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('tuhu-v')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
