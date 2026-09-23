@@ -29,3 +29,12 @@
 - GitHub runner 重新生成并提交 lock；锁定后的依赖审计结果为 0 info / 0 low / 0 moderate / 0 high / 0 critical。
 - 新增 Dependency Audit workflow，后续 package / lock 变化会自动复核。
 - 当前状态：**v56 功能冻结候选版**。后续不再增加主功能，只允许真机兼容修复、真实订单状态更新和独立图片高清替换。
+
+
+## 第三批：发布前依赖与构建收尾
+
+- Capacitor `core/android/ios/cli` 统一升级到 7.6.9，保持同一 major，避免跨到 Capacitor 8 的 breaking changes。
+- `package-lock.json` 重新由 GitHub Linux runner 解析生成并同步回仓库，依赖图固定。
+- CLI 依赖链中的 `tar` 已升级到 7.5.22。
+- CI 改为严格 `npm ci`，并加入 `npm audit --audit-level=high`。
+- v56 版本标记已统一；旧版标记仅保留在兼容注释/历史说明中，不影响运行时版本。
