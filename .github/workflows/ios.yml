@@ -21,14 +21,14 @@ jobs:
     env:
       BUNDLE_ID: com.fieldnotes.singaporejieyang
       SCHEME: App
-      APP_VERSION: 55.0.0
+      APP_VERSION: 56.0.0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Install JS dependencies
-        run: npm install
+        run: npm ci
       - name: Verify source structure
         run: npm run check:source
       - name: Require runtime media bundle
@@ -59,12 +59,12 @@ jobs:
             build
           APP_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*/Build/Products/Debug-iphonesimulator/App.app' -print -quit)
           test -n "$APP_PATH"
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" TUHU-v55-iOS-Simulator.zip
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" TUHU-v56-iOS-Simulator.zip
       - uses: actions/upload-artifact@v4
         if: ${{ inputs.target == 'simulator' }}
         with:
-          name: TUHU-v55-iOS-Simulator
-          path: TUHU-v55-iOS-Simulator.zip
+          name: TUHU-v56-iOS-Simulator
+          path: TUHU-v56-iOS-Simulator.zip
           if-no-files-found: error
 
       - name: Import Apple distribution certificate
@@ -135,7 +135,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ inputs.target == 'testflight' }}
         with:
-          name: TUHU-v55-iOS-IPA
+          name: TUHU-v56-iOS-IPA
           path: ${{ env.IPA }}
           if-no-files-found: error
       - name: Upload to TestFlight
