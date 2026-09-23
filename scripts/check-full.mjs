@@ -9,9 +9,9 @@ const sandbox={window:{}};vm.createContext(sandbox);
 for(const f of ['trip-data.js','image-registry.js','audio-data.js'])vm.runInContext(fs.readFileSync('www/js/'+f,'utf8'),sandbox);
 const D=sandbox.window.TRIP,A=sandbox.window.TUHU_AUDIO,R=sandbox.window.TUHU_IMAGE_REGISTRY;
 let total=0;const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-assert(D.VERSION==='v50','Unexpected data version');
+assert(D.VERSION==='v56','Unexpected data version');
 assert(D.ORDER.length===6,'Expected six trip days');
-assert(R?.version==='v55-existing-image-polish'&&Array.isArray(R.entries),'Missing v55 image registry');
+assert(R?.version==='v56-field-image-audit'&&Array.isArray(R.entries),'Missing v56 image registry');
 const imageIds=new Set();for(const x of R.entries){assert(!imageIds.has(x.id),'Duplicate image id '+x.id);imageIds.add(x.id);if(x.scene_id!=='*')assert(D.SCENE[x.scene_id],'Unknown image scene '+x.scene_id);for(const key of (x.scenes||[]))assert(D.SCENE[key],'Unknown moment scene '+key+' / '+x.id);assert(Array.isArray(x.card_targets)&&x.card_targets.length,'Missing image targets '+x.id);for(const rel of [x.src,x.thumb].filter(Boolean))assert(fs.existsSync(path.join('www',rel)),'Missing registry asset '+rel)}
 
 const imageFor=(key,target='timeline')=>{const list=R.entries.filter(x=>x.scene_id===key&&(x.card_targets||[]).includes(target)).slice().sort((a,b)=>(a.priority||99)-(b.priority||99));return list.find(x=>x.role==='hero')||list[0]||null};
@@ -28,8 +28,8 @@ assert(JSON.parse(fs.readFileSync('capacitor.config.json','utf8')).appId==='com.
 for(const f of ['www/index.html','www/sw.js','README.md','native/android/MainActivity.java','native/android/TuhuFilesPlugin.java','native/android/TuhuLlmPlugin.java','www/js/assistant.js'])assert(fs.existsSync(f),'Missing '+f);
 for(const f of ['motion.js','assistant.js','app.js'])new vm.Script(fs.readFileSync('www/js/'+f,'utf8'),{filename:f});
 const appSource=fs.readFileSync('www/js/app.js','utf8');
-for(const marker of ['function presentView','walletNowCard','booking_id:id','flight-zh9884','flight-zh227','updateFileHolder','credential-scene-button','HOME_MOMENT_OVERRIDE','scene-product-grid'])assert(appSource.includes(marker),'Missing v55 marker: '+marker);
+for(const marker of ['function presentView','walletNowCard','booking_id:id','flight-zh9884','flight-zh227','updateFileHolder','credential-scene-button','HOME_MOMENT_OVERRIDE','scene-product-grid'])assert(appSource.includes(marker),'Missing v56 marker: '+marker);
 assert(fs.readFileSync('scripts/prepare-android.mjs','utf8').includes('llama-android:0.1.1'),'Missing Android llama.cpp dependency');
 assert(fs.readFileSync('native/android/MainActivity.java','utf8').includes('TuhuLlmPlugin'),'LLM plugin not registered');
-console.log(`PASS: ${D.ORDER.length} days / ${total} entries / ${Object.keys(A).length} audio clips / ${R.entries.length} registered images / offline assistant + v54 wallet + v55 field polish wired.`);
+console.log(`PASS: ${D.ORDER.length} days / ${total} entries / ${Object.keys(A).length} audio clips / ${R.entries.length} registered images / offline assistant + v54 wallet + v56 field-use polish wired.`);
 console.log('Static integrity only. Native compilation and physical-device playback must be verified separately.');
