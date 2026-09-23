@@ -21,10 +21,9 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-        continue-on-error: true
-      - name: Generate deterministic lock
-        run: npm install --package-lock-only --ignore-scripts
-      - name: Audit dependencies
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Audit locked dependencies
         id: audit
         shell: bash
         run: |
