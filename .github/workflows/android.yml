@@ -18,7 +18,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
-      - run: npm install
+      - run: npm ci
       - name: Verify source structure
         run: npm run check:source
       - name: Require runtime media bundle
