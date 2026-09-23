@@ -11,7 +11,7 @@ if(!fs.existsSync('android/app/build.gradle'))run('npx',['--no-install','cap','a
 run('npx',['--no-install','cap','sync','android']);
 const java='android/app/src/main/java/com/fieldnotes/singaporejieyang';fs.mkdirSync(java,{recursive:true});
 for(const name of ['MainActivity.java','TuhuFilesPlugin.java','TuhuLlmPlugin.java'])fs.copyFileSync('native/android/'+name,java+'/'+name);
-const gradle='android/app/build.gradle';let g=fs.readFileSync(gradle,'utf8');g=g.replace(/versionCode\s+\d+/,'versionCode 55').replace(/versionName\s+"[^"]+"/,'versionName "55.0.0"');if(!g.includes('dev.ffmpegkit-maintained:llama-android'))g=g.replace(/dependencies\s*\{/,m=>m+'\n    implementation "dev.ffmpegkit-maintained:llama-android:0.1.1"');fs.writeFileSync(gradle,g);
+const gradle='android/app/build.gradle';let g=fs.readFileSync(gradle,'utf8');g=g.replace(/versionCode\s+\d+/,'versionCode 56').replace(/versionName\s+"[^"]+"/,'versionName "56.0.0"');if(!g.includes('dev.ffmpegkit-maintained:llama-android'))g=g.replace(/dependencies\s*\{/,m=>m+'\n    implementation "dev.ffmpegkit-maintained:llama-android:0.1.1"');fs.writeFileSync(gradle,g);
 const vars='android/variables.gradle';if(fs.existsSync(vars)){let v=fs.readFileSync(vars,'utf8');v=v.replace(/minSdkVersion\s*=\s*\d+/,'minSdkVersion = 24');fs.writeFileSync(vars,v);}
 const manifest='android/app/src/main/AndroidManifest.xml';let m=fs.readFileSync(manifest,'utf8');
 if(!m.includes('android.intent.action.TTS_SERVICE')){
@@ -23,4 +23,4 @@ if(!m.includes('android.intent.action.TTS_SERVICE')){
 m=m.replace('android:allowBackup="true"','android:allowBackup="false"');fs.writeFileSync(manifest,m);
 const strings='android/app/src/main/res/values/strings.xml';let s=fs.readFileSync(strings,'utf8');s=s.replace(/(<string name="app_name">)[^<]*(<\/string>)/,'$1兔狐$2').replace(/(<string name="title_activity_main">)[^<]*(<\/string>)/,'$1兔狐$2');fs.writeFileSync(strings,s);
 if(fs.existsSync('native/android/res'))fs.cpSync('native/android/res','android/app/src/main/res',{recursive:true});
-console.log('\nTuhu v55 prepared with on-device GGUF support. Open android/ in Android Studio, choose JDK 21, sync Gradle, and Generate APKs.');
+console.log('\nTuhu v56 prepared with on-device GGUF support. Open android/ in Android Studio, choose JDK 21, sync Gradle, and Generate APKs.');
