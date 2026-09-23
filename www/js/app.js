@@ -67,7 +67,7 @@ function momentMarkup(key,module){
  const im=momentFor(key,module);if(!im)return'';
  return `<figure class="moment-card"><img src="${esc(imageURL(im))}" alt="${esc(im.title||'旅行瞬间')}" loading="lazy" decoding="async" style="object-position:${esc(im.focal||'50% 50%')}"><figcaption>${esc(im.title||'旅行瞬间')}</figcaption></figure>`;
 }
-const HOME_IMAGE_ID_OVERRIDE={arrival:'companion-arrival-01'};
+const HOME_IMAGE_ID_OVERRIDE={arrival:'companion-arrival-01'};\nconst HOME_NO_IMAGE=new Set(['t1']);
 const HOME_MOMENT_OVERRIDE={
  hgh:'execution',
  sleep:'rest',
@@ -309,6 +309,11 @@ function sceneView(v){
  else if(c.s.kind==='flight'){
   const names=c.row[2].split('→');
   hero=`<div class="flight-summary"><div><strong>${esc(names[0]?.trim()||c.row[1])}</strong><small>${esc(c.row[0].split('–')[0])}</small></div>${icon('plane')}<div><strong>${esc(names[1]?.trim()||'出发')}</strong><small>${esc(c.row[0].split('–')[1]||'')}</small></div></div>`;
+ }else if(c.s.kind==='train'){
+  const x=c.s.train||{};
+  hero=`<div class="train-summary"><div><strong>${esc(x.from||c.row[3]||'出发')}</strong><small>${esc((x.time||c.row[0]).split('→')[0].trim())}</small></div>${icon('train')}<div><strong>${esc(x.to||c.row[1])}</strong><small>${esc((x.time||'').split('→')[1]?.trim()||'')}</small></div>${x.via?`<span>${esc(x.via)}</span>`:''}</div>`;
+ }else if(c.key==='t1'){
+  hero=`<div class="airport-summary"><span>${icon('plane')}</span><div><small>Changi Airport</small><strong>Terminal 1</strong><b>${esc(c.row[3]||'TR128')}</b></div></div>`;
  }
  const now=D.SCENE_BRIEF[c.key]?.find(x=>x[0]==='NOW');
  const action=now?[now[1],now[2]].filter(Boolean).join(' · '):c.row[2],relatedBooking=bookingForScene(c.key,c.day);
@@ -453,7 +458,7 @@ function englishView(v){
  const cats=englishCategories(v);if(!cats.length)return'<div class="empty">这站暂无预置英语。</div>';
  if(!cats.includes(v.cat))v.cat=cats[0];
  const focus=englishFocusRows(v),focused=!!(v.key&&focus.length&&!v.all&&!v.query);
- return `<div class="english-toolbar"><span class="audio-label">${icon('sound')}离线语音</span>${speedButtons()}</div>${focused?`<div class="english-focus-head"><div><small>现在最可能用到</small><b>${focus.length} 句</b></div>${btn('全部语句','english-all',{},'chip')}</div>`:''}<div class="english-filter">${!focused&&cats.length>1?`<select class="input" id="englishCategory" aria-label="选择英语场景">${cats.map(k=>`<option value="${esc(k)}" ${k===v.cat?'selected':''}>${esc(D.ENGLISH_LABELS[k]||k)}</option>`).join('')}</select>`:''}<input id="englishSearch" class="input" type="search" placeholder="找一句话…" value="${esc(v.query||'')}" aria-label="筛选预置英语"></div><div id="audioBar" class="audio-bar" hidden><span id="playingLine"></span><div class="audio-meter"><i id="audioProgress"></i></div><small id="audioTime"></small>${ib('stop','stop-audio',{},'停止朗读')}</div><div id="englishPhrases">${phraseCards(v)}</div>`;
+ return `<div class="english-toolbar"><span class="audio-label">${icon('sound')}离线语音</span>${speedButtons()}</div>${focused?`<div class="english-focus-head"><div><small>现在最可能用到</small><b>${focus.length} 句</b></div>${btn('全部语句','english-all',{},'chip')}</div>`:''}${focused?'':`<div class="english-filter">${cats.length>1?`<select class="input" id="englishCategory" aria-label="选择英语场景">${cats.map(k=>`<option value="${esc(k)}" ${k===v.cat?'selected':''}>${esc(D.ENGLISH_LABELS[k]||k)}</option>`).join('')}</select>`:''}<input id="englishSearch" class="input" type="search" placeholder="找一句话…" value="${esc(v.query||'')}" aria-label="筛选预置英语"></div>`}<div id="audioBar" class="audio-bar" hidden><span id="playingLine"></span><div class="audio-meter"><i id="audioProgress"></i></div><small id="audioTime"></small>${ib('stop','stop-audio',{},'停止朗读')}</div><div id="englishPhrases">${phraseCards(v)}</div>`;
 }
 function phraseView(v){
  return `<div class="show-phrase"><p lang="en">${esc(v.en||'')}</p><span>${esc(v.zh||'')}</span></div><div class="show-phrase-actions">${btn(icon('sound')+'播放','say',{text:v.en},'button')}${btn(icon('copy')+'复制','copy',{text:v.en},'button secondary')}${speedButtons()}</div>`;
