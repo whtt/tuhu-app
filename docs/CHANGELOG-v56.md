@@ -38,3 +38,12 @@
 - CLI 依赖链中的 `tar` 已升级到 7.5.22。
 - CI 改为严格 `npm ci`，并加入 `npm audit --audit-level=high`。
 - v56 版本标记已统一；旧版标记仅保留在兼容注释/历史说明中，不影响运行时版本。
+
+
+## 第四批：真机前置加固
+
+- 设置页新增“真机自检”，检查 localStorage、票夹 IndexedDB、离线行程、离线音频、persistent storage、原生/分享桥接与 safe-area 信息。
+- 启动时对支持的环境请求 persistent storage，降低浏览器/PWA 数据被回收的概率。
+- iPhone 凭证文件 fallback 改为优先调用系统 Share Sheet，不再优先依赖 WKWebView 的 blob 页面跳转。
+- iPhone PDF 文案统一为“打开 / 分享 PDF”。
+- 新增 `docs/DEVICE-TEST.md`，作为 Android APK / iPhone TestFlight 的发布验收标准。
