@@ -13,9 +13,17 @@ async function webShareFile(options={}){
   const bin=atob(base64),bytes=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   const file=new File([bytes],name,{type:mime});
-  if(navigator.share&&navigator.canShare?.({files:[file]}))return navigator.share({files:[file],title:name});
+  // In WKWebView, prefer the system share sheet even for the user-facing "open" action.
+  // This lets iPhone hand the PDF/image to Preview, Files, AirDrop, etc., instead of
+  // depending on blob: navigation support inside the embedded web view.
+  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+    return navigator.share({files:[file],title:name});
+  }
   if(mode==='open'){
-    const url=URL.createObjectURL(file);window.open(url,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(url),60000);return;
+    const url=URL.createObjectURL(file);
+    window.open(url,'_blank','noopener');
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    return;
   }
   throw new Error('iPhone 当前无法调用系统文件分享');
 }
