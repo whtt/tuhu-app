@@ -16,10 +16,11 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, zipfile
-          skip={'.git','node_modules','android','ios','dist'}
+          skip_root={'.git','node_modules','android','ios','dist'}
           with zipfile.ZipFile('tuhu-v56-source.zip','w',zipfile.ZIP_DEFLATED) as z:
               for root, dirs, files in os.walk('.'):
-                  dirs[:]=[d for d in dirs if d not in skip]
+                  if os.path.relpath(root,'.')=='.':
+                      dirs[:]=[d for d in dirs if d not in skip_root]
                   for f in files:
                       p=os.path.join(root,f)
                       if p.startswith('./tuhu-v56-source.zip'): continue
