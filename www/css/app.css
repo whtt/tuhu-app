@@ -132,3 +132,12 @@
 .airport-summary>span svg{width:24px;height:24px}.airport-summary div{min-width:0}.airport-summary small{display:block;font-size:10px;color:#7c9299;margin-bottom:3px}.airport-summary strong{display:block;font-size:20px;color:#1f4652;line-height:1.15}.airport-summary b{display:block;font-size:11px;color:#5d7c85;margin-top:5px;font-weight:600}
 .train-summary{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;gap:9px;padding:15px 16px;margin:0 0 12px;border:1px solid #dcebea;border-radius:20px;background:linear-gradient(120deg,#f7fbfa,#f3f7fb);text-align:center}
 .train-summary>svg{width:25px;height:25px;margin:auto;color:#477f8b}.train-summary strong{display:block;font-size:17px;color:#244853}.train-summary small{display:block;font-size:10px;color:#789097;margin-top:3px}.train-summary>span{grid-column:1/-1;font-size:10px;color:#7d9097;padding-top:7px;border-top:1px solid #e3ecec}
+
+
+/* v56 on-device readiness check. */
+.device-check-intro{text-align:center;padding:22px 15px 18px;border:1px solid #deeaeb;border-radius:20px;background:linear-gradient(145deg,#f8fcfb,#f4f5ff);margin-bottom:12px}
+.device-check-intro>span{width:52px;height:52px;margin:0 auto 10px;display:grid;place-items:center;border-radius:17px;background:#e6f3f1;color:#27838d}.device-check-intro>span svg{width:26px;height:26px}
+.device-check-intro h3{font-size:17px}.device-check-intro p{font-size:11px;color:#7d9299;margin-top:6px}
+.device-check-list{display:grid;gap:8px;margin-bottom:12px}.device-check-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 12px;border:1px solid #e2ecec;border-radius:15px;background:#fff}
+.device-check-dot{width:9px;height:9px;border-radius:50%;background:#8ba2a7}.device-check-row.pass .device-check-dot{background:#3ca37f}.device-check-row.warn .device-check-dot{background:#d59a42}.device-check-row.fail .device-check-dot{background:#d4655e}.device-check-row.info .device-check-dot{background:#668fc2}
+.device-check-row b{display:block;font-size:12px}.device-check-row small{display:block;margin-top:3px;font-size:9.5px;color:#81949a;line-height:1.45}.device-check-row em{font-style:normal;font-size:9.5px;color:#71858c;white-space:nowrap}.device-check-row.pass em{color:#33886d}.device-check-row.warn em{color:#a8772f}.device-check-row.fail em{color:#b7524c}
